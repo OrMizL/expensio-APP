@@ -2,3 +2,11 @@
     display: flex;
     justify-content: space-between;
 }
+
+.currency-symbol {
+    font-size: 0.7rem;
+}
+
+.month-amount {
+    font-weight: 500;
+}

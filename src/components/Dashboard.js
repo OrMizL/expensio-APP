@@ -44,6 +44,8 @@ const monthsList = generateMonthsList();
 
 export default function Dashboard() {
     const [currentCategories, setCurrentCategories] = React.useState([]);
+    const [currentIncomeCat, setCurrentIncomeCat] = React.useState([]);
+    const [currentExpenseCat, setCurrentExpenseCat] = React.useState([]);
     const [year, setYear] = React.useState(moment().format('YYYY'));
     const [yearTransactions, setYearTransactions] = React.useState([]);
     const [isUpsertDialogOpen, setIsUpsertDialogOpen] = React.useState(false);
@@ -60,6 +62,16 @@ export default function Dashboard() {
         }
     };
 
+    const getCategoriesByType = async () => {
+        try {
+            let response = await axios.get('http://localhost:3001/category/get-by-type');
+            setCurrentIncomeCat(response.data.income_cat);
+            setCurrentExpenseCat(response.data.expense_cat);
+        } catch (err) {
+            throw new Error(err);
+        }
+    };
+
     const getAllTransactionsForYear = async (year) => {
         try {
             let response = await axios.get('http://localhost:3001/transaction/get-all-year', { params: { year } });
@@ -71,6 +83,7 @@ export default function Dashboard() {
 
     React.useEffect(() => {
         getAllCategories();
+        getCategoriesByType();
     }, []);
 
     React.useEffect(() => {
@@ -154,16 +167,39 @@ export default function Dashboard() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {currentCategories.map((category) => (
+                        <TableRow sx={{}}>
+                            <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap', borderBottom: '0', fontWeight: 'bold' }}>
+                                Income
+                            </TableCell>
+                        </TableRow>
+                        {currentIncomeCat.map((category) => (
                             <TableRow key={category._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap' }}>
                                     {category.title}
                                 </TableCell>
                                 {monthsList.map(month =>
-                                    <TableCell key={category._id + '_' + month.monthNumber} component="td" scope="row" sx={{ whiteSpace: 'nowrap' }}>
-                                        {getSymbolFromCurrency('ILS')}
-                                        {getCategoryTransactionsForMonth(category._id, month.monthNumber)}
-                                    </TableCell>    
+                                    <TableCell key={category._id + '_' + month.monthNumber} component="td" scope="row" sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                                        <span className='currency-symbol'>{getSymbolFromCurrency('ILS')}</span>
+                                        <span className='month-amount'>{getCategoryTransactionsForMonth(category._id, month.monthNumber)}</span>
+                                    </TableCell> 
+                                )}
+                            </TableRow>
+                        ))}
+                        <TableRow sx={{}}>
+                            <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap', borderBottom: '0', fontWeight: 'bold' }}>
+                                Expense
+                            </TableCell>
+                        </TableRow>
+                        {currentExpenseCat.map((category) => (
+                            <TableRow key={category._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap' }}>
+                                    {category.title}
+                                </TableCell>
+                                {monthsList.map(month =>
+                                    <TableCell key={category._id + '_' + month.monthNumber} component="td" scope="row" sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                                        <span className='currency-symbol'>{getSymbolFromCurrency('ILS')}</span>
+                                        <span className='month-amount'>{getCategoryTransactionsForMonth(category._id, month.monthNumber)}</span>
+                                    </TableCell> 
                                 )}
                             </TableRow>
                         ))}
